@@ -46,9 +46,11 @@ class HTTPHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         """ Handle GET request """
         print self.path
-        if self.path == '/webcam':
+        if self.path.startswith('/webcam'):
             self.send_response(200)
             self.send_header('Content-type', 'image/png')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Cache-Control', 'no-cache, must-revalidate')
             self.end_headers()
             with open(IMAGEFILE, 'rb') as imgfile:
                 self.wfile.write(imgfile.read())
