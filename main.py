@@ -12,9 +12,10 @@ from optparse import OptionParser
 from threading import Thread
 
 # todo: get IP automatically
-#IP = ...
+IP = ''
 PORT = 9001
 IMAGEFILE = 'image.png'
+TEMPLATE = ''
 
 class CameraThread(Thread):
     """ CameraThread captures images from USB webcam """
@@ -46,7 +47,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         """ Handle GET request """
         print self.path
-        if self.path.startswith('/webcam'):
+        if self.path.startswith('/webcam_raw'):
             self.send_response(200)
             self.send_header('Content-type', 'image/png')
             self.send_header('Pragma', 'no-cache')
@@ -54,11 +55,19 @@ class HTTPHandler(BaseHTTPRequestHandler):
             self.end_headers()
             with open(IMAGEFILE, 'rb') as imgfile:
                 self.wfile.write(imgfile.read())
+        elif self.path.startswith('/webcam'):
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            addr = IP + ":" + str(PORT)
+            self.wfile.write(TEMPLATE % (addr, addr))
+
         else:
             self.send_error(404, "Path not found: %s" % self.path)
 
 
 def main():
+    global IP, TEMPLATE
     # Parse command-line options
     parser = OptionParser()
     parser.add_option('-i', '--ip', dest='ip', help='Server IP address')
@@ -66,8 +75,11 @@ def main():
     if options.ip == None:
         print 'Error: You must give the IP address.\nRun with -h to see usage.'
         sys.exit(0)
+    IP = options.ip
 
-    ipaddr = options.ip
+    # Read template file
+    with open('webcam.html') as htmlfile:
+        TEMPLATE = htmlfile.read()
 
     
     # Initialize Pygame and camera
@@ -91,8 +103,8 @@ def main():
         camthread = None
 
     # Start server
-    server = HTTPServer((ipaddr, PORT), HTTPHandler)
-    print "Webcam server running at", (ipaddr, PORT)
+    server = HTTPServer((IP, PORT), HTTPHandler)
+    print "Webcam server running at", (IP, PORT)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

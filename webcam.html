@@ -1,0 +1,15 @@
+<html>
+<body>
+<img id="img" src="http://%s/webcam_raw">
+
+<script type="text/javascript">
+function reload_image() {
+    var timestamp = new Date().getTime();
+    document.getElementById("img").src = "http://%s/webcam_raw?random="+timestamp
+    setTimeout(reload_image, 1000);
+}
+
+reload_image();
+</script>
+</body>
+</html>
