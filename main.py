@@ -94,7 +94,7 @@ def main():
         sys.exit(-1)
 
     if platform.uname()[0] != 'Windows':
-        camera = pygame.camera.Camera(cam_list[0], (32, 24))
+        camera = pygame.camera.Camera(cam_list[0], (320, 240))
         camera.start()
 
         camthread = CameraThread(camera)
